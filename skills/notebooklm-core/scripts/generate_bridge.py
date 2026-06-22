@@ -5,16 +5,30 @@ import os
 import re
 
 def extract_json(text):
-    text = text.strip()
+    text_strip = text.strip()
     try:
-        return json.loads(text)
+        return json.loads(text_strip)
     except json.JSONDecodeError:
-        match = re.search(r'(\{.*\}|\[.*\])', text, re.DOTALL)
-        if match:
+        start_brace = text_strip.find('{')
+        end_brace = text_strip.rfind('}')
+
+        start_bracket = text_strip.find('[')
+        end_bracket = text_strip.rfind(']')
+
+        candidates = []
+        if start_brace != -1 and end_brace != -1 and end_brace > start_brace:
+            candidates.append((start_brace, end_brace))
+        if start_bracket != -1 and end_bracket != -1 and end_bracket > start_bracket:
+            candidates.append((start_bracket, end_bracket))
+
+        candidates.sort(key=lambda x: x[0])
+
+        for start_idx, end_idx in candidates:
             try:
-                return json.loads(match.group(1))
+                return json.loads(text_strip[start_idx:end_idx+1])
             except json.JSONDecodeError:
-                pass
+                continue
+
         raise json.JSONDecodeError("No JSON found", text, 0)
 
 def get_cli_path():
