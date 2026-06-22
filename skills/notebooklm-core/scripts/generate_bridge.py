@@ -58,16 +58,11 @@ if __name__ == "__main__":
     # format: python generate_bridge.py <type> <notebook_id> [instructions]
     nb_id = sys.argv[2]
     
-    if action == "audio":
+    if action in ["audio", "video"]:
         instructions = sys.argv[3] if len(sys.argv) > 3 else ""
-        run_cmd(["generate", "audio", instructions, "-n", nb_id])
-    elif action == "video":
-        instructions = sys.argv[3] if len(sys.argv) > 3 else ""
-        run_cmd(["generate", "video", instructions, "-n", nb_id])
-    elif action == "slide-deck":
-        run_cmd(["generate", "slide-deck", "-n", nb_id])
-    elif action == "quiz":
-        run_cmd(["generate", "quiz", "-n", nb_id])
+        run_cmd(["generate", action, instructions, "-n", nb_id])
+    elif action in ["slide-deck", "quiz", "mind-map", "report", "flashcards", "infographic", "data-table", "cinematic-video"]:
+        run_cmd(["generate", action, "-n", nb_id])
     elif action == "status":
         # Check status of an artifact
         # usage: python generate_bridge.py status <notebook_id> <task_id>

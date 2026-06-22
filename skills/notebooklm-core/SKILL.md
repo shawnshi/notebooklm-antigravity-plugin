@@ -51,9 +51,11 @@ Located in `config/plugins/notebooklm/skills/notebooklm-core/scripts/`:
 ```
 
 ### 3. `generate_bridge.py`
+Supports all 9 official artifacts: `audio`, `video`, `slide-deck`, `quiz`, `mind-map`, `report`, `flashcards`, `infographic`, `data-table` (plus `cinematic-video`).
 ```bash
 .\.venv\Scripts\python.exe generate_bridge.py audio <nb_id> [instructions]
 .\.venv\Scripts\python.exe generate_bridge.py slide-deck <nb_id>
+.\.venv\Scripts\python.exe generate_bridge.py report <nb_id>
 .\.venv\Scripts\python.exe generate_bridge.py status <nb_id>
 .\.venv\Scripts\python.exe generate_bridge.py download <nb_id> <task_id> <type> <output_path>
 ```
