@@ -68,6 +68,9 @@ if __name__ == "__main__":
     elif action == "research":
         # python notebook_bridge.py research <nb_id> <query> <mode>
         run_cmd(["source", "add-research", sys.argv[3], "--mode", sys.argv[4], "-n", sys.argv[2], "--no-wait"])
+    elif action == "wait-research":
+        # python notebook_bridge.py wait-research <nb_id>
+        run_cmd(["research", "wait", "-n", sys.argv[2]])
     elif action == "list-source":
         # python notebook_bridge.py list-source <nb_id>
         run_cmd(["source", "list", "-n", sys.argv[2]])

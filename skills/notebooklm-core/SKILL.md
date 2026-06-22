@@ -17,7 +17,7 @@ The Python environment for this skill is managed in `scripts/.venv/`.
 
 **Mandatory Orchestration Rules**:
 1. For quick tasks (create notebook, list, status): Execute the script synchronously.
-2. For long tasks (audio, video, deep research): You MUST use the `daemon_watchdog.py` background task rather than looping or polling.
+2. For long tasks (audio, video, deep research): You MUST use the `wait` commands via `run_command` in the background, which will natively suspend and wake you up when complete.
 
 ## <RULE: VECTOR_LAKE_SYNC> (Two-Way Mapping)
 When you create a Notebook using `notebook_bridge.py create`, you MUST:
@@ -48,6 +48,7 @@ Located in `config/plugins/notebooklm/skills/notebooklm-core/scripts/`:
 .\.venv\Scripts\python.exe notebook_bridge.py delete-source <nb_id> <source_id>
 .\.venv\Scripts\python.exe notebook_bridge.py ask <nb_id> "Your question here"
 .\.venv\Scripts\python.exe notebook_bridge.py research <nb_id> <query> <mode>
+.\.venv\Scripts\python.exe notebook_bridge.py wait-research <nb_id>
 ```
 
 ### 3. `generate_bridge.py`
@@ -57,11 +58,6 @@ Supports all 9 official artifacts: `audio`, `video`, `slide-deck`, `quiz`, `mind
 .\.venv\Scripts\python.exe generate_bridge.py slide-deck <nb_id>
 .\.venv\Scripts\python.exe generate_bridge.py report <nb_id>
 .\.venv\Scripts\python.exe generate_bridge.py status <nb_id>
+.\.venv\Scripts\python.exe generate_bridge.py wait <nb_id> <artifact_id>
 .\.venv\Scripts\python.exe generate_bridge.py download <nb_id> <task_id> <type> <output_path>
-```
-
-### 4. `daemon_watchdog.py` (Event-Driven Waiter)
-Use this script via Antigravity `run_command` in the background to automatically wake you up when a long-running generation finishes.
-```bash
-.\.venv\Scripts\python.exe daemon_watchdog.py <nb_id> <task_id>
 ```

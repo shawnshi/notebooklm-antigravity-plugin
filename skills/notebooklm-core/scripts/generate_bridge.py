@@ -64,10 +64,12 @@ if __name__ == "__main__":
     elif action in ["slide-deck", "quiz", "mind-map", "report", "flashcards", "infographic", "data-table", "cinematic-video"]:
         run_cmd(["generate", action, "-n", nb_id])
     elif action == "status":
-        # Check status of an artifact
-        # usage: python generate_bridge.py status <notebook_id> <task_id>
-        # Actually `artifact list` gets status of all. Let's just wrap `artifact list`.
+        # Check status of all artifacts
         run_cmd(["artifact", "list", "-n", nb_id])
+    elif action == "wait":
+        # usage: python generate_bridge.py wait <notebook_id> <artifact_id>
+        artifact_id = sys.argv[3]
+        run_cmd(["artifact", "wait", artifact_id, "-n", nb_id])
     elif action == "download":
         # usage: python generate_bridge.py download <notebook_id> <artifact_id> <type> <output_path>
         artifact_id = sys.argv[3]
