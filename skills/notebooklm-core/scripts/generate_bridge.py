@@ -50,32 +50,39 @@ def run_cmd(args):
         print(json.dumps({"raw_output": result.stdout.strip()}))
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python generate_bridge.py <action> [args...]")
-        sys.exit(1)
+    try:
+        if len(sys.argv) < 2:
+            print(json.dumps({"error": "Usage: python generate_bridge.py <action> [args...]"}))
+            sys.exit(1)
+
+        action = sys.argv[1]
+        # format: python generate_bridge.py <type> <notebook_id> [instructions]
+        nb_id = sys.argv[2]
         
-    action = sys.argv[1]
-    # format: python generate_bridge.py <type> <notebook_id> [instructions]
-    nb_id = sys.argv[2]
-    
-    if action in ["audio", "video"]:
-        instructions = sys.argv[3] if len(sys.argv) > 3 else ""
-        run_cmd(["generate", action, instructions, "-n", nb_id])
-    elif action in ["slide-deck", "quiz", "mind-map", "report", "flashcards", "infographic", "data-table", "cinematic-video"]:
-        run_cmd(["generate", action, "-n", nb_id])
-    elif action == "status":
-        # Check status of all artifacts
-        run_cmd(["artifact", "list", "-n", nb_id])
-    elif action == "wait":
-        # usage: python generate_bridge.py wait <notebook_id> <artifact_id>
-        artifact_id = sys.argv[3]
-        run_cmd(["artifact", "wait", artifact_id, "-n", nb_id])
-    elif action == "download":
-        # usage: python generate_bridge.py download <notebook_id> <artifact_id> <type> <output_path>
-        artifact_id = sys.argv[3]
-        art_type = sys.argv[4]
-        out_path = sys.argv[5]
-        run_cmd(["download", art_type, out_path, "-a", artifact_id, "-n", nb_id])
-    else:
-        print(json.dumps({"error": f"Unknown action: {action}"}))
+        if action in ["audio", "video"]:
+            instructions = sys.argv[3] if len(sys.argv) > 3 else ""
+            run_cmd(["generate", action, instructions, "-n", nb_id])
+        elif action in ["slide-deck", "quiz", "mind-map", "report", "flashcards", "infographic", "data-table", "cinematic-video"]:
+            run_cmd(["generate", action, "-n", nb_id])
+        elif action == "status":
+            # Check status of all artifacts
+            run_cmd(["artifact", "list", "-n", nb_id])
+        elif action == "wait":
+            # usage: python generate_bridge.py wait <notebook_id> <artifact_id>
+            artifact_id = sys.argv[3]
+            run_cmd(["artifact", "wait", artifact_id, "-n", nb_id])
+        elif action == "download":
+            # usage: python generate_bridge.py download <notebook_id> <artifact_id> <type> <output_path>
+            artifact_id = sys.argv[3]
+            art_type = sys.argv[4]
+            out_path = sys.argv[5]
+            run_cmd(["download", art_type, out_path, "-a", artifact_id, "-n", nb_id])
+        else:
+            print(json.dumps({"error": f"Unknown action: {action}"}))
+            sys.exit(1)
+    except IndexError:
+        print(json.dumps({"error": "Missing required arguments"}))
+        sys.exit(1)
+    except Exception as e:
+        print(json.dumps({"error": "An unexpected error occurred during execution"}))
         sys.exit(1)

@@ -52,36 +52,43 @@ def run_cmd(args):
         print(json.dumps({"raw_output": result.stdout.strip()}))
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python notebook_bridge.py <action> [args...]")
+    try:
+        if len(sys.argv) < 2:
+            print(json.dumps({"error": "Usage: python notebook_bridge.py <action> [args...]"}))
+            sys.exit(1)
+
+        action = sys.argv[1]
+        if action == "create":
+            # python notebook_bridge.py create "Title"
+            run_cmd(["create", sys.argv[2]])
+        elif action == "list":
+            run_cmd(["list"])
+        elif action == "add-source":
+            # python notebook_bridge.py add-source <nb_id> <url>
+            run_cmd(["source", "add", sys.argv[3], "-n", sys.argv[2]])
+        elif action == "research":
+            # python notebook_bridge.py research <nb_id> <query> <mode>
+            run_cmd(["source", "add-research", sys.argv[3], "--mode", sys.argv[4], "-n", sys.argv[2], "--no-wait"])
+        elif action == "wait-research":
+            # python notebook_bridge.py wait-research <nb_id>
+            run_cmd(["research", "wait", "-n", sys.argv[2]])
+        elif action == "list-source":
+            # python notebook_bridge.py list-source <nb_id>
+            run_cmd(["source", "list", "-n", sys.argv[2]])
+        elif action == "delete-source":
+            # python notebook_bridge.py delete-source <nb_id> <source_id>
+            run_cmd(["source", "delete", sys.argv[3], "-n", sys.argv[2]])
+        elif action == "ask":
+            # python notebook_bridge.py ask <nb_id> <question>
+            run_cmd(["ask", sys.argv[3], "-n", sys.argv[2]])
+        elif action == "status":
+            run_cmd(["status"])
+        else:
+            print(json.dumps({"error": f"Unknown action: {action}"}))
+            sys.exit(1)
+    except IndexError:
+        print(json.dumps({"error": "Missing required arguments"}))
         sys.exit(1)
-        
-    action = sys.argv[1]
-    if action == "create":
-        # python notebook_bridge.py create "Title"
-        run_cmd(["create", sys.argv[2]])
-    elif action == "list":
-        run_cmd(["list"])
-    elif action == "add-source":
-        # python notebook_bridge.py add-source <nb_id> <url>
-        run_cmd(["source", "add", sys.argv[3], "-n", sys.argv[2]])
-    elif action == "research":
-        # python notebook_bridge.py research <nb_id> <query> <mode>
-        run_cmd(["source", "add-research", sys.argv[3], "--mode", sys.argv[4], "-n", sys.argv[2], "--no-wait"])
-    elif action == "wait-research":
-        # python notebook_bridge.py wait-research <nb_id>
-        run_cmd(["research", "wait", "-n", sys.argv[2]])
-    elif action == "list-source":
-        # python notebook_bridge.py list-source <nb_id>
-        run_cmd(["source", "list", "-n", sys.argv[2]])
-    elif action == "delete-source":
-        # python notebook_bridge.py delete-source <nb_id> <source_id>
-        run_cmd(["source", "delete", sys.argv[3], "-n", sys.argv[2]])
-    elif action == "ask":
-        # python notebook_bridge.py ask <nb_id> <question>
-        run_cmd(["ask", sys.argv[3], "-n", sys.argv[2]])
-    elif action == "status":
-        run_cmd(["status"])
-    else:
-        print(json.dumps({"error": f"Unknown action: {action}"}))
+    except Exception as e:
+        print(json.dumps({"error": "An unexpected error occurred during execution"}))
         sys.exit(1)
