@@ -42,7 +42,11 @@ Located in `config/plugins/notebooklm/skills/notebooklm-core/scripts/`:
 ### 2. `notebook_bridge.py`
 ```bash
 .\.venv\Scripts\python.exe notebook_bridge.py create "My Research"
+.\.venv\Scripts\python.exe notebook_bridge.py list
 .\.venv\Scripts\python.exe notebook_bridge.py add-source <nb_id> <url>
+.\.venv\Scripts\python.exe notebook_bridge.py list-source <nb_id>
+.\.venv\Scripts\python.exe notebook_bridge.py delete-source <nb_id> <source_id>
+.\.venv\Scripts\python.exe notebook_bridge.py ask <nb_id> "Your question here"
 .\.venv\Scripts\python.exe notebook_bridge.py research <nb_id> <query> <mode>
 ```
 
