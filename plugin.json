@@ -1,0 +1,10 @@
+{
+  "name": "notebooklm",
+  "version": "1.0.0",
+  "description": "Antigravity Native Plugin for Google NotebookLM. Provides programmatic access to NotebookLM for research automation and multimodality generation.",
+  "author": "Antigravity Ecosystem",
+  "config": {
+    "auth_mode": "browser-cookies",
+    "target_browser": "chrome"
+  }
+}
