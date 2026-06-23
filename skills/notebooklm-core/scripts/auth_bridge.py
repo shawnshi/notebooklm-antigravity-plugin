@@ -64,21 +64,28 @@ def run_cmd(args):
         print(json.dumps({"raw_output": result.stdout.strip()}))
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python auth_bridge.py <action>")
-        sys.exit(1)
-        
-    action = sys.argv[1]
-    if action == "check":
-        run_cmd(["auth", "check", "--test"])
-    elif action == "login":
-        # Check if we should try headless cookie steal first
-        # python auth_bridge.py login [browser_name]
-        if len(sys.argv) > 2:
-            browser = sys.argv[2]
-            run_cmd(["login", "--browser-cookies", browser])
+    try:
+        if len(sys.argv) < 2:
+            print(json.dumps({"error": "Usage: python auth_bridge.py <action>"}))
+            sys.exit(1)
+
+        action = sys.argv[1]
+        if action == "check":
+            run_cmd(["auth", "check", "--test"])
+        elif action == "login":
+            # Check if we should try headless cookie steal first
+            # python auth_bridge.py login [browser_name]
+            if len(sys.argv) > 2:
+                browser = sys.argv[2]
+                run_cmd(["login", "--browser-cookies", browser])
+            else:
+                run_cmd(["login"])
         else:
-            run_cmd(["login"])
-    else:
-        print(json.dumps({"error": f"Unknown action: {action}"}))
+            print(json.dumps({"error": f"Unknown action: {action}"}))
+            sys.exit(1)
+    except IndexError:
+        print(json.dumps({"error": "Missing required arguments"}))
+        sys.exit(1)
+    except Exception as e:
+        print(json.dumps({"error": "An unexpected error occurred during execution"}))
         sys.exit(1)
