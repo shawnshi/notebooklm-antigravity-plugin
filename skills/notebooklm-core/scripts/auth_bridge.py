@@ -38,7 +38,7 @@ def get_cli_path():
 def run_cmd(args):
     cli = get_cli_path()
     if not os.path.exists(cli):
-        print(json.dumps({"error": f"CLI not found at {cli}. Ensure uv setup is complete."}))
+        print(json.dumps({"error": "CLI not found. Ensure uv setup is complete."}))
         sys.exit(1)
         
     cmd = [cli] + args + ["--json"]
@@ -54,14 +54,14 @@ def run_cmd(args):
             err_data = extract_json(output_str)
             print(json.dumps({"error": err_data, "exit_code": result.returncode}))
         except json.JSONDecodeError:
-            print(json.dumps({"error": output_str.strip(), "exit_code": result.returncode}))
+            print(json.dumps({"error": "CLI execution failed with non-JSON output", "exit_code": result.returncode}))
         sys.exit(result.returncode)
     
     try:
         data = extract_json(result.stdout)
         print(json.dumps(data))
     except json.JSONDecodeError:
-        print(json.dumps({"raw_output": result.stdout.strip()}))
+        print(json.dumps({"error": "CLI execution succeeded but returned non-JSON output"}))
 
 if __name__ == "__main__":
     try:
