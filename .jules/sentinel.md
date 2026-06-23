@@ -1,4 +1,4 @@
-## 2024-06-22 - [Stack Trace Leakage in Bridge Scripts]
-**Vulnerability:** The Python bridge scripts (`notebook_bridge.py`, `auth_bridge.py`, `generate_bridge.py`) were exposing raw Python stack traces (e.g., `IndexError` when required arguments were missing) directly to stdout.
-**Learning:** These scripts act as an isolated JSON-only bridge between the agent and the `notebooklm-py` CLI. Leaking stack traces violates the secure JSON contract, potentially crashing the agent's parser and exposing the internal file structure of the bridge directory.
-**Prevention:** Always wrap the `sys.argv` parsing and main execution blocks of bridge scripts in `try...except IndexError` and a fallback `try...except Exception` to ensure that all errors are returned as structured JSON payloads (`{"error": "..."}`) rather than unstructured text.
+## 2024-05-24 - Fix information disclosure in bridge scripts
+**Vulnerability:** Internal path and stack trace leakages were found in Python bridge scripts that wrap the underlying CLI. Hardcoded paths and generic output forwarding of `notebooklm.exe` errors could expose internal environment paths to end-users via the Antigravity NotebookLM Plugin json outputs.
+**Learning:** Python bridge scripts serving as strict JSON interfaces must be careful not to trust internal CLI tools to produce clean text output. Even simple error handlers printing output_str.strip() or formatted path variables on failure can bypass intended abstraction.
+**Prevention:** Always use generic structured error messages for any non-JSON/unexpected tool outputs and do not include internal environment/sandbox details (like filepaths or local executable paths) in error messages visible to the agent or users.
