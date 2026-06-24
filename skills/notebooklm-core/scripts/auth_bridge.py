@@ -86,6 +86,9 @@ if __name__ == "__main__":
     except IndexError:
         print(json.dumps({"error": "Missing required arguments"}))
         sys.exit(1)
+    except KeyboardInterrupt:
+        print(json.dumps({"error": "Execution interrupted by user"}))
+        sys.exit(1)
     except Exception as e:
         print(json.dumps({"error": "An unexpected error occurred during execution"}))
         sys.exit(1)
