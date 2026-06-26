@@ -2,7 +2,6 @@ import sys
 import json
 import subprocess
 import os
-import re
 
 def extract_json(text):
     text_strip = text.strip()
