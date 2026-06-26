@@ -4,15 +4,14 @@ import subprocess
 import os
 
 def extract_json(text):
-    text_strip = text.strip()
     try:
-        return json.loads(text_strip)
+        return json.loads(text)
     except json.JSONDecodeError:
-        start_brace = text_strip.find('{')
-        end_brace = text_strip.rfind('}')
+        start_brace = text.find('{')
+        end_brace = text.rfind('}')
 
-        start_bracket = text_strip.find('[')
-        end_bracket = text_strip.rfind(']')
+        start_bracket = text.find('[')
+        end_bracket = text.rfind(']')
 
         candidates = []
         if start_brace != -1 and end_brace != -1 and end_brace > start_brace:
@@ -24,7 +23,7 @@ def extract_json(text):
 
         for start_idx, end_idx in candidates:
             try:
-                return json.loads(text_strip[start_idx:end_idx+1])
+                return json.loads(text[start_idx:end_idx+1])
             except json.JSONDecodeError:
                 continue
 

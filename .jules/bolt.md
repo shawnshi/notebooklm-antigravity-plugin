@@ -2,3 +2,6 @@
 ## 2024-05-15 - Unused standard library imports impact startup time
 **Learning:** In short-lived CLI wrapper architectures where Python scripts execute from scratch for every event, standard library imports like `re` add ~15-20ms of overhead. Even if documentation mentions regular expressions, native string methods are often used instead.
 **Action:** Always verify if expensive standard library imports are actually used in short-lived bridge scripts, as removing them provides a measurable reduction in startup time.
+## 2024-07-06 - [Redundant text.strip() allocation before json.loads()]
+**Learning:** `json.loads()` natively ignores leading and trailing whitespaces. Calling `.strip()` on a potentially large string payload (like a 10MB chunk from a standard output containing Base64 data or LLM payloads) before JSON parsing creates an entirely unnecessary string copy in memory, causing substantial CPU overhead.
+**Action:** Remove `.strip()` before calling `json.loads()` or `text.find()`. Use the string directly to prevent unnecessary string copies and O(N) allocation overhead.
