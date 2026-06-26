@@ -90,6 +90,7 @@ if __name__ == "__main__":
             artifact_id = sys.argv[3]
             art_type = sys.argv[4]
             out_path = sys.argv[5]
+
             run_cmd(["download", art_type, out_path, "-a", artifact_id, "-n", nb_id])
         else:
             print(json.dumps({"error": f"Unknown action: {action}"}))

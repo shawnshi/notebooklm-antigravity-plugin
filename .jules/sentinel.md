@@ -6,3 +6,7 @@
 **Vulnerability:** Python scripts bridging CLI tools to the multi-agent system used a generic `Exception` catch block to ensure JSON output, but `KeyboardInterrupt` inherits from `BaseException`, causing interrupt signals to print native Python stack traces.
 **Learning:** In strict JSON-contract environments, agents/skills expect purely structured JSON on stdout. Unhandled base exceptions break this contract and can leak internal file paths and execution context to the agent LLM context or logs.
 **Prevention:** Always explicitly catch `KeyboardInterrupt` alongside `Exception`, or catch `BaseException` if appropriate, ensuring standard exit flows always return JSON formatted strings when building bridge scripts.
+## 2024-05-24 - SSRF and LFI Protection Bypass via Naive String Matching
+**Vulnerability:** A previous security enhancement attempted to block internal IP addresses (e.g., `10.`, `192.168.`) in URLs using simple substring checks (`indicator in url`). This falsely flagged valid public URLs like `https://example.com/chapter-10.pdf` and failed to properly parse the hostname.
+**Learning:** Naive string matching on URLs is brittle, prone to false positives, and easily bypassed by attackers using different IP representations (like integers or octal) or complex URL structures.
+**Prevention:** Always use standard libraries like `urllib.parse` to extract the hostname, and resolve the hostname to an IP using `socket.gethostbyname` to check against private subnets utilizing the `ipaddress` module to robustly prevent SSRF and Local File Inclusion.

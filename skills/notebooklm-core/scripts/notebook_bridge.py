@@ -79,7 +79,37 @@ if __name__ == "__main__":
             run_cmd(["list"])
         elif action == "add-source":
             # python notebook_bridge.py add-source <nb_id> <url>
-            run_cmd(["source", "add", sys.argv[3], "-n", sys.argv[2]])
+            url = sys.argv[3]
+
+            # Security: Prevent SSRF and Local File Inclusion
+            if not url.startswith(("http://", "https://")):
+                print(json.dumps({"error": "Invalid URL: Must start with http:// or https://"}))
+                sys.exit(1)
+
+            import urllib.parse
+            import socket
+            import ipaddress
+
+            try:
+                parsed_url = urllib.parse.urlparse(url)
+                hostname = parsed_url.hostname or ""
+
+                # If hostname is localhost, block immediately
+                if hostname.lower() in ("localhost", "localhost.localdomain"):
+                    print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
+                    sys.exit(1)
+
+                # Resolve the hostname to an IP and check against private/loopback ranges
+                ip = socket.gethostbyname(hostname)
+                ip_obj = ipaddress.ip_address(ip)
+                if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+                    print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
+                    sys.exit(1)
+            except (socket.gaierror, ValueError, Exception):
+                # We do not block on resolution failure here, as the CLI will handle standard fetch errors.
+                pass
+
+            run_cmd(["source", "add", url, "-n", sys.argv[2]])
         elif action == "research":
             # python notebook_bridge.py research <nb_id> <query> <mode>
             run_cmd(["source", "add-research", sys.argv[3], "--mode", sys.argv[4], "-n", sys.argv[2], "--no-wait"])
