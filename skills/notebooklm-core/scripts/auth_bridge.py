@@ -87,6 +87,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print(json.dumps({"error": "Execution interrupted by user"}))
         sys.exit(1)
-    except Exception as e:
+    except Exception:
         print(json.dumps({"error": "An unexpected error occurred during execution"}))
         sys.exit(1)
