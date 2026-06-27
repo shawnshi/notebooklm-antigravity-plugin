@@ -10,3 +10,7 @@
 **Vulnerability:** A previous security enhancement attempted to block internal IP addresses (e.g., `10.`, `192.168.`) in URLs using simple substring checks (`indicator in url`). This falsely flagged valid public URLs like `https://example.com/chapter-10.pdf` and failed to properly parse the hostname.
 **Learning:** Naive string matching on URLs is brittle, prone to false positives, and easily bypassed by attackers using different IP representations (like integers or octal) or complex URL structures.
 **Prevention:** Always use standard libraries like `urllib.parse` to extract the hostname, and resolve the hostname to an IP using `socket.gethostbyname` to check against private subnets utilizing the `ipaddress` module to robustly prevent SSRF and Local File Inclusion.
+## 2024-05-24 - Path Traversal in generate_bridge.py
+**Vulnerability:** A local file inclusion/path traversal vulnerability allowed arbitrary file writes via the `download` action's `out_path` argument in `generate_bridge.py` since it lacked input validation.
+**Learning:** In short-lived CLI wrapper scripts, file system arguments passed from agents/users can bypass higher-level safety checks. The lack of strict output validation meant that `out_path` could overwrite sensitive system files (e.g., `../../../etc/passwd`).
+**Prevention:** Always validate resolved file paths using robust path checking functions like `os.path.commonpath` to ensure absolute output paths remain constrained to permitted sandbox directories (like `brain/` or `scratch/`) and cannot traverse out of bounds.

@@ -89,6 +89,24 @@ if __name__ == "__main__":
             art_type = sys.argv[4]
             out_path = sys.argv[5]
 
+            # Security: Prevent Path Traversal
+            # Resolve the output path absolutely
+            abs_out = os.path.abspath(out_path)
+
+            # The bridge scripts execute from the repo root in this setup, or we must ensure
+            # they write strictly within current working directory's brain or scratch folders.
+            cwd = os.getcwd()
+            allowed_brain = os.path.abspath(os.path.join(cwd, "brain"))
+            allowed_scratch = os.path.abspath(os.path.join(cwd, "scratch"))
+
+            # Ensure the output path is strictly within the allowed directories
+            is_valid_brain = os.path.commonpath([allowed_brain, abs_out]) == allowed_brain
+            is_valid_scratch = os.path.commonpath([allowed_scratch, abs_out]) == allowed_scratch
+
+            if not (is_valid_brain or is_valid_scratch):
+                print(json.dumps({"error": "Invalid output path: Path must strictly resolve within the 'brain' or 'scratch' directories"}))
+                sys.exit(1)
+
             run_cmd(["download", art_type, out_path, "-a", artifact_id, "-n", nb_id])
         else:
             print(json.dumps({"error": f"Unknown action: {action}"}))
