@@ -21,9 +21,9 @@ The Python environment for this skill is managed in `scripts/.venv/`.
 
 ## <RULE: VECTOR_LAKE_SYNC> (Two-Way Mapping)
 When you create a Notebook using `notebook_bridge.py create`, you MUST:
-1. Ensure the Concept does not already exist via the `check_duplicate_entity` skill.
-2. Create or map a node in the local Vector Lake graph using the `memory_update` skill, attaching the Notebook ID as metadata.
-3. Any textual artifacts generated from NotebookLM (like Study Guides or Summaries) must be synced into the local graph.
+1. Ensure the Concept does not already exist via the `call_mcp_tool` for `check_duplicate_entity`.
+2. Create or map a node in the local Vector Lake graph using the `call_mcp_tool` for `update_operational_memory`, attaching the Notebook ID as metadata.
+3. Any textual artifacts generated from NotebookLM (like Study Guides or Summaries) MUST be synced into the local graph by delegating to the `vector-lake-ingestor` subagent via `invoke_subagent`. (DO NOT execute heavy sync synchronously).
 
 ## <RULE: ARTIFACT_ROUTING> (Media Handling)
 When downloading Audio or Video outputs from `generate_bridge.py`, you MUST NOT simply leave the raw `.wav`/`.mp4` in the `scratch/` directory.
@@ -31,33 +31,36 @@ You MUST create an Antigravity Artifact `.md` file in the `brain/<conversation-i
 
 ## Available Adapter Scripts
 
-Located in `config/plugins/notebooklm/skills/notebooklm-core/scripts/`:
+Located in `config/plugins/notebooklm/skills/notebooklm-core/scripts/`.
+**CRITICAL**: You MUST execute these using the `run_command` tool. 
+- Set the `Cwd` parameter to `C:\Users\shich\.gemini\config\plugins\notebooklm\skills\notebooklm-core\scripts`.
+- Prefix ALL commands with `$env:PYTHONIOENCODING="utf-8";` to prevent Windows encoding crashes.
 
 ### 1. `auth_bridge.py`
 ```bash
-.\.venv\Scripts\python.exe auth_bridge.py check
-.\.venv\Scripts\python.exe auth_bridge.py login
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe auth_bridge.py check
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe auth_bridge.py login
 ```
 
 ### 2. `notebook_bridge.py`
 ```bash
-.\.venv\Scripts\python.exe notebook_bridge.py create "My Research"
-.\.venv\Scripts\python.exe notebook_bridge.py list
-.\.venv\Scripts\python.exe notebook_bridge.py add-source <nb_id> <url>
-.\.venv\Scripts\python.exe notebook_bridge.py list-source <nb_id>
-.\.venv\Scripts\python.exe notebook_bridge.py delete-source <nb_id> <source_id>
-.\.venv\Scripts\python.exe notebook_bridge.py ask <nb_id> "Your question here"
-.\.venv\Scripts\python.exe notebook_bridge.py research <nb_id> <query> <mode>
-.\.venv\Scripts\python.exe notebook_bridge.py wait-research <nb_id>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py create "My Research"
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py list
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py add-source <nb_id> <url>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py list-source <nb_id>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py delete-source <nb_id> <source_id>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py ask <nb_id> "Your question here"
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py research <nb_id> <query> <mode>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe notebook_bridge.py wait-research <nb_id>
 ```
 
 ### 3. `generate_bridge.py`
 Supports all 9 official artifacts: `audio`, `video`, `slide-deck`, `quiz`, `mind-map`, `report`, `flashcards`, `infographic`, `data-table` (plus `cinematic-video`).
 ```bash
-.\.venv\Scripts\python.exe generate_bridge.py audio <nb_id> [instructions]
-.\.venv\Scripts\python.exe generate_bridge.py slide-deck <nb_id>
-.\.venv\Scripts\python.exe generate_bridge.py report <nb_id>
-.\.venv\Scripts\python.exe generate_bridge.py status <nb_id>
-.\.venv\Scripts\python.exe generate_bridge.py wait <nb_id> <artifact_id>
-.\.venv\Scripts\python.exe generate_bridge.py download <nb_id> <task_id> <type> <output_path>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe generate_bridge.py audio <nb_id> [instructions]
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe generate_bridge.py slide-deck <nb_id>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe generate_bridge.py report <nb_id>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe generate_bridge.py status <nb_id>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe generate_bridge.py wait <nb_id> <artifact_id>
+$env:PYTHONIOENCODING="utf-8"; .\.venv\Scripts\python.exe generate_bridge.py download <nb_id> <task_id> <type> <output_path>
 ```
