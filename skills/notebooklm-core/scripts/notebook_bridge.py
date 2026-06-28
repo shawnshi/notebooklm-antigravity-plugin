@@ -101,14 +101,19 @@ if __name__ == "__main__":
                 clean_hostname = hostname.strip("[]")
                 try:
                     ip_obj = ipaddress.ip_address(clean_hostname)
+                    if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+                        print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
+                        sys.exit(1)
                 except ValueError:
                     # Resolve the hostname to an IP and check against private/loopback ranges
-                    ip = socket.gethostbyname(hostname)
-                    ip_obj = ipaddress.ip_address(ip)
+                    # using getaddrinfo to support both IPv4 and IPv6 resolution
+                    for addr_info in socket.getaddrinfo(hostname, None):
+                        ip = addr_info[4][0]
+                        ip_obj = ipaddress.ip_address(ip)
+                        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+                            print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
+                            sys.exit(1)
 
-                if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
-                    print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
-                    sys.exit(1)
             except (socket.gaierror, ValueError, Exception):
                 # We do not block on resolution failure here, as the CLI will handle standard fetch errors.
                 pass
