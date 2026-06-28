@@ -97,9 +97,15 @@ if __name__ == "__main__":
                     print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
                     sys.exit(1)
 
-                # Resolve the hostname to an IP and check against private/loopback ranges
-                ip = socket.gethostbyname(hostname)
-                ip_obj = ipaddress.ip_address(ip)
+                # Try parsing as IP directly, stripping brackets for IPv6 literals
+                clean_hostname = hostname.strip("[]")
+                try:
+                    ip_obj = ipaddress.ip_address(clean_hostname)
+                except ValueError:
+                    # Resolve the hostname to an IP and check against private/loopback ranges
+                    ip = socket.gethostbyname(hostname)
+                    ip_obj = ipaddress.ip_address(ip)
+
                 if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
                     print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
                     sys.exit(1)
@@ -134,6 +140,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print(json.dumps({"error": "Execution interrupted by user"}))
         sys.exit(1)
-    except Exception as e:
+    except Exception:
         print(json.dumps({"error": "An unexpected error occurred during execution"}))
         sys.exit(1)

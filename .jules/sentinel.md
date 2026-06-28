@@ -14,3 +14,7 @@
 **Vulnerability:** A local file inclusion/path traversal vulnerability allowed arbitrary file writes via the `download` action's `out_path` argument in `generate_bridge.py` since it lacked input validation.
 **Learning:** In short-lived CLI wrapper scripts, file system arguments passed from agents/users can bypass higher-level safety checks. The lack of strict output validation meant that `out_path` could overwrite sensitive system files (e.g., `../../../etc/passwd`).
 **Prevention:** Always validate resolved file paths using robust path checking functions like `os.path.commonpath` to ensure absolute output paths remain constrained to permitted sandbox directories (like `brain/` or `scratch/`) and cannot traverse out of bounds.
+## 2024-06-27 - SSRF Protection Bypass via IPv6 Literals
+**Vulnerability:** The SSRF check in `notebook_bridge.py` used `socket.gethostbyname(hostname)` which fails to resolve IPv6 literals (e.g., `[::1]`) and throws a `socket.gaierror`. This exception was silently caught in a general `except` block, allowing attackers to bypass the check.
+**Learning:** Functions like `socket.gethostbyname()` do not inherently support IPv6 IP literals. Generic exception handling masking these errors leads to silently bypassing security filters.
+**Prevention:** Explicitly parse input hostnames as IP literals using `ipaddress.ip_address()` prior to using DNS resolution routines. Alternatively, use `socket.getaddrinfo()` which properly supports both IPv4 and IPv6 resolutions.
