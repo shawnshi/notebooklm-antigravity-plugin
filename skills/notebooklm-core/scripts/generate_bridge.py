@@ -5,7 +5,7 @@ import os
 
 def extract_json(text):
     try:
-        return json.loads(text)
+        return json.loads(text), text
     except json.JSONDecodeError:
         start_brace = text.find('{')
         end_brace = text.rfind('}')
@@ -23,7 +23,8 @@ def extract_json(text):
 
         for start_idx, end_idx in candidates:
             try:
-                return json.loads(text[start_idx:end_idx+1])
+                candidate_str = text[start_idx:end_idx+1]
+                return json.loads(candidate_str), candidate_str
             except json.JSONDecodeError:
                 continue
 
@@ -49,15 +50,17 @@ def run_cmd(args):
     if result.returncode != 0:
         output_str = result.stdout if result.stdout.strip() else result.stderr
         try:
-            err_data = extract_json(output_str)
+            err_data, _ = extract_json(output_str)
             print(json.dumps({"error": err_data, "exit_code": result.returncode}))
         except json.JSONDecodeError:
             print(json.dumps({"error": "CLI execution failed with non-JSON output", "exit_code": result.returncode}))
         sys.exit(result.returncode)
     
     try:
-        data = extract_json(result.stdout)
-        print(json.dumps(data))
+        # Avoid redundant JSON serialization for successful responses
+        # print(json.dumps(data)) is slow for large objects (e.g. 10MB reports)
+        _, raw_json_str = extract_json(result.stdout)
+        print(raw_json_str)
     except json.JSONDecodeError:
         print(json.dumps({"error": "CLI execution succeeded but returned non-JSON output"}))
 

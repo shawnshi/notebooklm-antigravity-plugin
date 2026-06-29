@@ -5,3 +5,6 @@
 ## 2024-07-06 - [Redundant text.strip() allocation before json.loads()]
 **Learning:** `json.loads()` natively ignores leading and trailing whitespaces. Calling `.strip()` on a potentially large string payload (like a 10MB chunk from a standard output containing Base64 data or LLM payloads) before JSON parsing creates an entirely unnecessary string copy in memory, causing substantial CPU overhead.
 **Action:** Remove `.strip()` before calling `json.loads()` or `text.find()`. Use the string directly to prevent unnecessary string copies and O(N) allocation overhead.
+## 2024-07-06 - [Redundant JSON re-serialization overhead]
+**Learning:** Extracting JSON via `json.loads()` and then immediately re-serializing it using `json.dumps()` creates significant CPU and memory overhead, especially for large payloads like 10MB reports. Validating JSON by parsing is necessary, but the re-serialization step is completely redundant when the raw text was already valid JSON.
+**Action:** When acting as a bridge or wrapper that just passes JSON through, parse it for validation but return/print the original matched raw string directly instead of re-serializing it with `json.dumps()`.
