@@ -7,26 +7,25 @@ def extract_json(text):
     try:
         return json.loads(text), text
     except json.JSONDecodeError:
-        start_brace = text.find('{')
-        end_brace = text.rfind('}')
+        decoder = json.JSONDecoder()
 
+        start_brace = text.find('{')
         start_bracket = text.find('[')
-        end_bracket = text.rfind(']')
 
         candidates = []
-        if start_brace != -1 and end_brace != -1 and end_brace > start_brace:
-            candidates.append((start_brace, end_brace))
-        if start_bracket != -1 and end_bracket != -1 and end_bracket > start_bracket:
-            candidates.append((start_bracket, end_bracket))
+        if start_brace != -1:
+            candidates.append(start_brace)
+        if start_bracket != -1:
+            candidates.append(start_bracket)
 
-        candidates.sort(key=lambda x: x[0])
+        candidates.sort()
 
-        for start_idx, end_idx in candidates:
+        for start_idx in candidates:
             try:
-                candidate_str = text[start_idx:end_idx+1]
-                return json.loads(candidate_str), candidate_str
+                obj, new_end = decoder.raw_decode(text, start_idx)
+                return obj, text[start_idx:new_end]
             except json.JSONDecodeError:
-                continue
+                pass
 
         raise json.JSONDecodeError("No JSON found", text, 0)
 
