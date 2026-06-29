@@ -104,7 +104,7 @@ if __name__ == "__main__":
                 clean_hostname = hostname.strip("[]")
                 try:
                     ip_obj = ipaddress.ip_address(clean_hostname)
-                    if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+                    if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_multicast or ip_obj.is_unspecified or ip_obj.is_reserved:
                         print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
                         sys.exit(1)
                 except ValueError:
@@ -113,13 +113,14 @@ if __name__ == "__main__":
                     for addr_info in socket.getaddrinfo(hostname, None):
                         ip = addr_info[4][0]
                         ip_obj = ipaddress.ip_address(ip)
-                        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+                        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_multicast or ip_obj.is_unspecified or ip_obj.is_reserved:
                             print(json.dumps({"error": "Invalid URL: Local and internal IPs are not allowed"}))
                             sys.exit(1)
 
             except (socket.gaierror, ValueError, Exception):
-                # We do not block on resolution failure here, as the CLI will handle standard fetch errors.
-                pass
+                # Fail securely: If DNS resolution or parsing fails, we block to prevent SSRF bypasses via malformed payloads (e.g. 127.0.0.1%00)
+                print(json.dumps({"error": "Invalid URL: Unable to resolve hostname securely"}))
+                sys.exit(1)
 
             run_cmd(["source", "add", url, "-n", sys.argv[2]])
         elif action == "research":

@@ -22,3 +22,7 @@
 **Vulnerability:** A Server-Side Request Forgery (SSRF) bypass in `notebook_bridge.py` allowed access to internal IPv6 addresses.
 **Learning:** The check relied on `socket.gethostbyname()`, which fails (throws an exception) for IPv6-only domains. A generic `except` block suppressed this failure, effectively bypassing the SSRF protection entirely and allowing the request to proceed.
 **Prevention:** Always use `socket.getaddrinfo()` to resolve hostnames, ensuring both IPv4 and IPv6 addresses are handled. Check all returned addresses, and do not swallow exceptions during security checks without enforcing a fail-secure state.
+## 2024-05-18 - Fix SSRF Fail-Open Bypass
+**Vulnerability:** The SSRF URL validation in `notebook_bridge.py` caught exceptions during `socket.getaddrinfo` (e.g., from `127.0.0.1%00`) and used `pass`, failing open and allowing malformed but potentially bypassable URLs to reach the CLI. Additionally, it did not block multicast, unspecified, or reserved IPs.
+**Learning:** Exception handlers in security validation logic must "fail securely" (fail closed). If parsing or DNS resolution fails, the input should be treated as malicious or invalid to prevent edge-case bypasses.
+**Prevention:** Ensure all `except` blocks in validation functions return an error and exit execution, rather than continuing execution (`pass`). Explicitly check all restricted IP properties (`is_multicast`, `is_unspecified`, `is_reserved`) alongside standard private network checks.
