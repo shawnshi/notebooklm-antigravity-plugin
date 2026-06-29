@@ -18,3 +18,7 @@
 **Vulnerability:** The SSRF check in `notebook_bridge.py` used `socket.gethostbyname(hostname)` which fails to resolve IPv6 literals (e.g., `[::1]`) and throws a `socket.gaierror`. This exception was silently caught in a general `except` block, allowing attackers to bypass the check.
 **Learning:** Functions like `socket.gethostbyname()` do not inherently support IPv6 IP literals. Generic exception handling masking these errors leads to silently bypassing security filters.
 **Prevention:** Explicitly parse input hostnames as IP literals using `ipaddress.ip_address()` prior to using DNS resolution routines. Alternatively, use `socket.getaddrinfo()` which properly supports both IPv4 and IPv6 resolutions.
+## 2024-05-24 - SSRF Bypass via IPv6 gethostbyname Failure
+**Vulnerability:** A Server-Side Request Forgery (SSRF) bypass in `notebook_bridge.py` allowed access to internal IPv6 addresses.
+**Learning:** The check relied on `socket.gethostbyname()`, which fails (throws an exception) for IPv6-only domains. A generic `except` block suppressed this failure, effectively bypassing the SSRF protection entirely and allowing the request to proceed.
+**Prevention:** Always use `socket.getaddrinfo()` to resolve hostnames, ensuring both IPv4 and IPv6 addresses are handled. Check all returned addresses, and do not swallow exceptions during security checks without enforcing a fail-secure state.
