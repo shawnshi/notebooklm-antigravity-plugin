@@ -92,14 +92,14 @@ if __name__ == "__main__":
             out_path = sys.argv[5]
 
             # Security: Prevent Path Traversal
-            # Resolve the output path absolutely
-            abs_out = os.path.abspath(out_path)
+            # Resolve the output path absolutely and resolve symlinks
+            abs_out = os.path.realpath(out_path)
 
             # The bridge scripts execute from the repo root in this setup, or we must ensure
             # they write strictly within current working directory's brain or scratch folders.
             cwd = os.getcwd()
-            allowed_brain = os.path.abspath(os.path.join(cwd, "brain"))
-            allowed_scratch = os.path.abspath(os.path.join(cwd, "scratch"))
+            allowed_brain = os.path.realpath(os.path.join(cwd, "brain"))
+            allowed_scratch = os.path.realpath(os.path.join(cwd, "scratch"))
 
             # Ensure the output path is strictly within the allowed directories
             is_valid_brain = os.path.commonpath([allowed_brain, abs_out]) == allowed_brain
